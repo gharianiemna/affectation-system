@@ -1,0 +1,10 @@
+commands:
+composer require lexik/jwt-authentication-bundle
+openssl genpkey -algorithm RSA -out config/jwt/private.pem -aes256
+openssl genpkey -algorithm RSA -out config/jwt/private.pem -aes256
+
+configs:
+security
+routes
+
+composer require symfony/serializer-pack
