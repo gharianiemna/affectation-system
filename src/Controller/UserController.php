@@ -10,25 +10,23 @@ use App\Repository\UserRepository;
 use App\Service\UserService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use FOS\RestBundle\Controller\Annotations as Rest;
-
+use Symfony\Component\Validator\ConstraintViolationList;
 class UserController extends AbstractController
 {
-private $userService;
-public function __construct(UserService $userService){
-    $this->userService=$userService;
-}
-    /**
-     * @Rest\Post("/signin")
-     */
-    public function Register(Request $request): Response
-    {
-        dd("1");
-    try {
 
-        $this->userService->register($request);
-        return new JsonResponse('ok');
-    } catch (\Exception $e) {
-        return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
+    /**
+     * @Rest\Post("/Register")
+     */
+    public function Register(Request $request, UserService $userService): Response
+    {
+        try {
+            $result = $userService->register($request->getContent());
+            if ($result instanceof JsonResponse) {
+                return $result; 
+            }
+            return new JsonResponse(['result' => 'ok'], 201);
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
+        }
     }
-}
 }

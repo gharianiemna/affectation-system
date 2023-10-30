@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -25,7 +27,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255,nullable=false)
+     * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"users"})
      */
     private $firstName;
@@ -33,24 +35,33 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
      *  @Groups({"users"})
+     * @Assert\NotBlank()
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="integer", nullable=false)
      *  @Groups({"users"})
+     * @Assert\NotBlank()
      */
     private $age;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
      *  @Groups({"users"})
+     *  @Assert\Expression("this.getLevel() in ['deb', 'inter', 'expert']", message="Invalid level")
      */
     private $level;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *      min = 5,
+     *      minMessage = "Your first name must be at least {{ limit }} characters long"
+     * )
      */
+
     private $password;
 
     /**
@@ -60,6 +71,8 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=191, nullable=false, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Unique
      */
     private $username;
 
