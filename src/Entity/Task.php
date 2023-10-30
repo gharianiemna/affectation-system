@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 /**
  * @ORM\Entity(repositoryClass=TaskRepository::class)
@@ -19,11 +21,14 @@ class Task
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\ExpressionLanguageSyntax(
+     *     allowedVariables={"migration", "installation", "portabilité"}
+     * )
      */
     private $type;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="integer")
      */
     private $difficulty;
 
@@ -34,23 +39,31 @@ class Task
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Regex(
+     *     pattern="/^[a-zA-Z]{2}-[a-zA-Z]{4}-[a-zA-Z]{2}$/",
+     *     message="The code must match the format xx-xxxx-xx"
+     * )
      */
     private $code;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="integer")
+     * @Assert\GreaterThanOrEqual(
+     *     value = 0,
+     *     message = "Duration must be greater than or equal to 0"
+     * )
      */
-    private $startDate;
-
-    /**
-     * @ORM\Column(type="time")
-     */
-    private $duration;
+    private $duration = 60;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="task")
      */
     private $user;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $startDate;
 
     public function getId(): ?int
     {
@@ -105,24 +118,14 @@ class Task
         return $this;
     }
 
-    public function getStartDate(): ?\DateTimeInterface
-    {
-        return $this->startDate;
-    }
 
-    public function setStartDate(\DateTimeInterface $startDate): self
-    {
-        $this->startDate = $startDate;
 
-        return $this;
-    }
-
-    public function getDuration(): ?\DateTimeInterface
+    public function getDuration(): ?int
     {
         return $this->duration;
     }
 
-    public function setDuration(\DateTimeInterface $duration): self
+    public function setDuration(int $duration): self
     {
         $this->duration = $duration;
 
@@ -137,6 +140,18 @@ class Task
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getStartDate(): ?\DateTimeInterface
+    {
+        return $this->startDate;
+    }
+
+    public function setStartDate(\DateTimeInterface $startDate): self
+    {
+        $this->startDate = $startDate;
 
         return $this;
     }

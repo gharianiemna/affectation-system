@@ -11,12 +11,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity("username")
  */
-
- 
 class User implements UserInterface , PasswordAuthenticatedUserInterface
 {
     /**
@@ -28,37 +29,41 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
-     * @Groups({"users"})
+     * @Groups({"register"})
+     * @Assert\NotBlank()
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
-     *  @Groups({"users"})
+     * @Groups({"register"})
      * @Assert\NotBlank()
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="integer", nullable=false)
-     *  @Groups({"users"})
+     * @Groups({"register"})
      * @Assert\NotBlank()
      */
     private $age;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
-     *  @Groups({"users"})
-     *  @Assert\Expression("this.getLevel() in ['deb', 'inter', 'expert']", message="Invalid level")
+     * @Groups({"register"})
+     * @Assert\ExpressionLanguageSyntax(
+     *     allowedVariables={"deb", "inter", "expert"}
+     * )
      */
     private $level;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @Groups({"register"})
      * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 5,
-     *      minMessage = "Your first name must be at least {{ limit }} characters long"
+     *      minMessage = "Your password must be at least 5 characters long"
      * )
      */
 
@@ -66,17 +71,18 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Task::class, mappedBy="user")
+     * @Groups({"register"})
      */
     private $task;
 
     /**
      * @ORM\Column(type="string", length=191, nullable=false, unique=true)
+     * @Groups({"register"})
      * @Assert\NotBlank()
-     * @Assert\Unique
      */
     private $username;
 
-     /**
+    /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -198,10 +204,10 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         $roles[] = 'ROLE_USER';
- 
+
         return array_unique($roles);
     }
- 
+
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;

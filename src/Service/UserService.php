@@ -18,23 +18,24 @@ class UserService
     private $userRepository;
     private $userPasswordHasher;
     private $serializer;
+    private $validator;
     public function __construct(
     EntityManagerInterface $entityManager, 
     UserRepository $userRepository, 
     UserPasswordHasherInterface $userPasswordHasher, 
-    SerializerInterface $serializer)
+    SerializerInterface $serializer, ValidatorInterface $validator )
     {
         $this->entityManager=$entityManager;
         $this->userRepository=$userRepository;
         $this->userPasswordHasher=$userPasswordHasher;
         $this->serializer=$serializer;
-
+        $this->validator = $validator;
     }
     public function register($data ){ 
         $user = $this->serializer->deserialize($data, User::class, 'json');
         $user->setPassword($this->userPasswordHasher->hashPassword($user, $user->getPassword()));
-        $validator = Validation::createValidatorBuilder()->enableAnnotationMapping()->getValidator();
-        $errors = $validator->validate($user);  
+       // $validator = Validation::createValidatorBuilder()->enableAnnotationMapping()->getValidator();
+        $errors = $this->validator->validate($user);  
         if (count($errors) > 0) {
             $firstError = $errors[0];
             $response = [
