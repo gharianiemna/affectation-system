@@ -6,7 +6,7 @@ use App\Repository\UserRepository;
 use App\Service\UserService;
 
 
-class userServiceTest extends KernelTestCase
+class UserServiceTest extends KernelTestCase
 {
     private $userService;
 

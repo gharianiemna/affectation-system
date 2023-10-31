@@ -31,7 +31,21 @@ class TaskController extends AbstractController
         }
     }
 
-
+    /**
+     * @Rest\Put("/api/updateTask/{taskId}")
+     */
+    public function updateTask(Request $request, TaskService $taskService, Task $taskId): Response
+    {
+        try {
+            $result = $taskService->updateTask($request->getContent(), $taskId);
+            if ($result instanceof JsonResponse) {
+                return $result; 
+            }
+            return new JsonResponse(['result' => 'ok'], 201);
+        } catch (\Exception $e) {
+            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
+        }
+    }
 
     /**
      * @Rest\Delete("/api/removeTask/{taskId}")
@@ -46,15 +60,5 @@ class TaskController extends AbstractController
         }
     }
 
-
-        /**
-     * @Rest\Put("/api/updateTask/{taskId}")
-     */
-    public function updateTask(Request $request, TaskService $taskService): Response
-    {
-
-    }
-
-   
 }
 
