@@ -47,21 +47,12 @@ class Task
     private $code;
 
     /**
-     * @ORM\Column(type="integer")
-     * @Assert\GreaterThanOrEqual(
-     *     value = 0,
-     *     message = "Duration must be greater than or equal to 0"
-     * )
-     */
-    private $duration = 60;
-
-    /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="task")
      */
     private $user;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $startDate;
 
@@ -114,20 +105,6 @@ class Task
     public function setCode(string $code): self
     {
         $this->code = $code;
-
-        return $this;
-    }
-
-
-
-    public function getDuration(): ?int
-    {
-        return $this->duration;
-    }
-
-    public function setDuration(int $duration): self
-    {
-        $this->duration = $duration;
 
         return $this;
     }

@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Task;
+use App\Service\TaskService;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use DateTime;
 
@@ -17,11 +18,12 @@ class ImportExcelCommand extends Command
     protected static $defaultName = 'app:import-excel';
 
     private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    private $taskService;
+    public function __construct(EntityManagerInterface $entityManager, TaskService $taskService)
     {
         parent::__construct();
         $this->entityManager = $entityManager;
+        $this->taskService = $taskService;
     }
 
     protected function configure()
@@ -41,11 +43,13 @@ class ImportExcelCommand extends Command
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
         foreach ($sheetData as $rowData) {
             $task = new Task();
+            $format = "m/d/Y H:i:s";
             $task->setType($rowData['A']);
-            $task->setDifficulty($rowData['B']);
-            $task->setName($rowData['C']);
-            $task->setCode($rowData['D']);
-            $task->setStartDate(new \DateTime($rowData['E']));
+            $task->setName($rowData['B']);
+            $task->setCode($rowData['C']);
+            $dateString = $rowData['D'] . ' ' . $rowData['E'];
+            $task->setStartDate(DateTime::createFromFormat($format, $dateString));
+            $task->setDifficulty($this->taskService->taskReview($task));
             $this->entityManager->persist($task);
         }
         $this->entityManager->flush();

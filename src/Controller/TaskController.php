@@ -9,9 +9,8 @@ use App\Entity\Task;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Symfony\Component\Routing\Annotation\Route;
-use DateTime;
+
+
 
 class TaskController extends AbstractController
 {
@@ -20,15 +19,8 @@ class TaskController extends AbstractController
      */
     public function addTask(Request $request, TaskService $taskService): Response
     {
-        try {
             $result = $taskService->addTask($request->getContent());
-            if ($result instanceof JsonResponse) {
-                return $result; 
-            }
-            return new JsonResponse(['result' => 'ok'], 201);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
-        }
+            return new JsonResponse($result['message'], $result['code']);
     }
 
     /**
@@ -36,15 +28,8 @@ class TaskController extends AbstractController
      */
     public function updateTask(Request $request, TaskService $taskService, Task $taskId): Response
     {
-        try {
-            $result = $taskService->updateTask($request->getContent(), $taskId);
-            if ($result instanceof JsonResponse) {
-                return $result; 
-            }
-            return new JsonResponse(['result' => 'ok'], 201);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
-        }
+        $result = $taskService->updateTask($request->getContent(), $taskId);
+        return new JsonResponse($result['message'], $result['code']);
     }
 
     /**
@@ -52,12 +37,8 @@ class TaskController extends AbstractController
      */
     public function removeTask(Task $taskId, TaskService $taskService): Response
     {
-        try {
         $result = $taskService->removeTask($taskId);
-            return new JsonResponse(['result' => 'ok'], 201);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
-        }
+        return new JsonResponse($result['message'], $result['code']);
     }
 
 }

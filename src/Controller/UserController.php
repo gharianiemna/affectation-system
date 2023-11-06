@@ -18,14 +18,16 @@ class UserController extends AbstractController
      */
     public function Register(Request $request, UserService $userService): Response
     {
-        try {
-            $result = $userService->register($request->getContent());
-            if ($result instanceof JsonResponse) {
-                return $result; 
-            }
-            return new JsonResponse(['result' => 'ok'], 201);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'fail', 'error' => $e->getMessage()], 400);
-        }
+        $result = $userService->register($request->getContent());
+        return new JsonResponse($result['message'], $result['code']);
     }
+/**
+ * @Rest\Post("/api/affect/{date}")
+ */
+public function affect(UserService $userService, string $date): Response
+{
+    $result = $userService->taskAssign($date);
+    return new JsonResponse($result['message'], $result['code']);
+}
+
 }

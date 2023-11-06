@@ -60,7 +60,6 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"register"})
-     * @Assert\NotBlank()
      * @Assert\Length(
      *      min = 5,
      *      minMessage = "Your password must be at least 5 characters long"

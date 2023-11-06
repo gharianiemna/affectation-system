@@ -30,52 +30,63 @@ class TaskService
     }
 
     public function addTask($data){
+        $result=[];
         $task = $this->serializer->deserialize($data, Task::class, 'json');
+        $task->setDifficulty($this->taskReview($task));
         $errors = $this->validator->validate($task);  
         if (count($errors) > 0) {
-            $firstError = $errors[0];
-            $response = [
-                'property' => $firstError->getPropertyPath(),
-                'value' => $firstError->getInvalidValue(),
-                'error' => $firstError->getMessage(),
-            ];
-            return new JsonResponse($response, 400);
-        }
+            $result=['message'=>(string)$errors, 'code'=> 400];
+        }else{
         $this->entityManager->persist($task);
         $this->entityManager->flush();
-        return new JsonResponse(['result' => 'ok'], 201);
+        $result=['message'=>'ok', 'code'=> 201];
+        }
+    return $result;
     }
 
-    public function updateTask($data, $taskId): JsonResponse 
-    {
+    public function updateTask($data, $taskId){     
+        $result=[];
         $currentTask = $this->taskRepository->find($taskId);
         if (!$currentTask) {
-            return new JsonResponse(['error' => 'Task not found'], 404);
+            $result=['message'=> 'Task not found', 'code'=> 404];
         }
         $updatedTask = $this->serializer->deserialize($data, 
             Task::class, 
             'json', 
             [AbstractNormalizer::OBJECT_TO_POPULATE => $currentTask]);
-
         $errors = $this->validator->validate($updatedTask);  
         if (count($errors) > 0) {
-            $firstError = $errors[0];
-            $response = [
-                'property' => $firstError->getPropertyPath(),
-                'value' => $firstError->getInvalidValue(),
-                'error' => $firstError->getMessage(),
-            ];
-            return new JsonResponse($response, 400);
+            $result=['message'=>(string)$errors, 'code'=> 400];
+        }else{
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
+        $result=['message'=>'ok', 'code'=> 201];
         }
-                $this->entityManager->persist($updatedTask);
-                $this->entityManager->flush();
-        return new JsonResponse(['result' => 'success'], 200);
+        return $result;
     }
 
-
-   public function removeTask($task){
+    public function removeTask($task){
+        $result=[];
         $this->entityManager->remove($task);
         $this->entityManager->flush();
-        return new JsonResponse(['result' => 'success'], 200);
+        return  $result=['message'=>'ok', 'code'=> 200];
+    }
+
+    public function taskReview($task) {
+        $type = $task->getType();
+        $code = trim($task->getCode()); // Remove leading and trailing spaces
+        $typeMappings = ['migration' => 1, 'installation' => 2, 'portabilité' => 4];
+        $diff = $typeMappings[$type] ?? 0;
+        $value = 0;
+        if (str_contains($code, 'rsta')) {
+            $value = 1;
+        } elseif (str_contains($code, 'ftth')) {
+            $value = 4;
+        } elseif (str_starts_with($code, 'ot')) {
+            $value = 2;
+        } elseif (str_starts_with($code, 'as')) {
+            $value = 3;
+        }
+        return max($diff, $value);
     }
 }

@@ -39,20 +39,58 @@ class TaskRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Task[] Returns an array of Task objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+        * @return Task[] Returns an array of Task objects
+        */
+        public function findByDifficulty($difficulty, $dateObj): array
+        {
+            $from = new \DateTime($dateObj . "00:00:00");
+            $to = new \DateTime($dateObj . "23:59:59");
+            return $this->createQueryBuilder('t')
+                ->andWhere('t.difficulty = :difficulty')
+                ->andWhere('t.user IS NULL')
+                ->andWhere('t.startDate BETWEEN :from AND :to')
+                ->setParameter('difficulty', $difficulty)
+                ->setParameter('from', $from)
+                ->setParameter('to', $to)
+                ->orderBy('t.id', 'ASC')
+                ->getQuery()
+                ->getResult();
+        }
+        
+        
+    /**
+     * @return Task[] Returns an array of Task objects for the current day.
+     */
+    public function findByUserToday($user, $dateObj): array
+    {
+        $from = new \DateTime($dateObj . "00:00:00");
+        $to = new \DateTime($dateObj . "23:59:59");
+        
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.user = :user')
+            ->andWhere('t.startDate BETWEEN :from AND :to')
+            ->setParameter('user', $user->getId())
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    public function findByUserNow($user, $dateObj): array
+    {
+        $time = new \DateTime($dateObj );
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.user = :user')
+            ->andWhere('t.startDate = :from ')
+            ->setParameter('user', $user->getId())
+            ->setParameter('from', $time)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
 //    public function findOneBySomeField($value): ?Task
 //    {
