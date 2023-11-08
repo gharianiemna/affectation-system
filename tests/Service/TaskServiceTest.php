@@ -56,8 +56,8 @@ class TaskServiceTest extends KernelTestCase
             "type" => "migration",
             "difficulty" =>1,
             "name" => "emnana",
-            "code" => "xx-xxxx-xx",
-            "startDate" => "2018-11-11" 
+            "code" => "xx-rsta-xx",
+            "startDate" => "2018-11-11 01:00:00" 
         ])));
 
         $validator = $this->createMock(ValidatorInterface::class);
