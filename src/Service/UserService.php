@@ -69,12 +69,14 @@ class UserService
         foreach ($taskList as $task) {
                 foreach ($userList as $key => $user) {
                     $canUserHandleTask = $this->affectationTaskUserService->canHandleTask($user, $task);
-                    // date ne pas passer mais dans canHandle retrieve from the startdate of the task
+
                     if($canUserHandleTask) {
                         $task->setUser($user);
                         $this->entityManager->persist($task);
                         $this->entityManager->flush();
                         
+                        // reorganiser la liste des utilisateurs FIFO
+
                         unset($userList[$key]);
                         array_push($userList, $user);
                         $userList = array_values($userList); 

@@ -11,16 +11,11 @@ class AffectationTaskUserService
     public const PORTABILITE = 'portabilité';
     public const INSTALLATION = 'installation';
 
-    private $userTaskHours ;
-    private $userCountTasksAffected;
     private static $userTaksInfo = [];
 
 
-    public function __construct(
-
-    ) {
-        $this->userTaskHours = array();
-        $this->userCountTasksAffected = 0;
+    public function __construct() 
+    {
     }
 
     public function canHandleTask($user, $task): bool
