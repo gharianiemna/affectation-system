@@ -2,78 +2,66 @@
 
 namespace App\Service;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Validator\Validation;
-use App\Repository\TaskRepository;
-
 class AffectationTaskUserService
-{   const DEB = 'deb';
-    const INTER = 'inter';
-    const EXPERT = 'expert';
-    const MIGRATION ='migration';
-    const PORTABILITE= 'portabilité';
-    const INSTALLATION= 'installation';
-    private $entityManager;
-    private $userRepository;
-    private $taskRepository;
+{
+    public const DEB = 'deb';
+    public const INTER = 'inter';
+    public const EXPERT = 'expert';
+    public const MIGRATION = 'migration';
+    public const PORTABILITE = 'portabilité';
+    public const INSTALLATION = 'installation';
+
+    private $userTaskHours ;
+    private $userCountTasksAffected;
+    private static $userTaksInfo = [];
 
 
-    
     public function __construct(
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        TaskRepository $taskRepository
+
     ) {
-        $this->entityManager = $entityManager;
-        $this->userRepository = $userRepository;
-        $this->taskRepository = $taskRepository;
+        $this->userTaskHours = array();
+        $this->userCountTasksAffected = 0;
     }
 
-    public function canHandleTask($user, $task, $date): bool
-    {   
-        $userAssignedTaskList=[];
-        $maxTotalTasks = 0;
-        $currentTaskHours = [];
-        $countTasksAffected = 0;
-        $maxTaskByHour=0;
-        $countUserAssignedTasks=0;
-        $taskDifficulty=$task->getDifficulty();
-        $expertise = $user->getLevel();
-        $difficulties  = $this->getDifficultyByExpertise($expertise);
-        $maxTaskByHour=$this->getMaxTaskByHour($expertise);
-        $TaskType=$task->getType();
-        $userTaskType=$this->getTaskType($expertise);
-        if (in_array($taskDifficulty, $difficulties)) {
-            if (in_array($TaskType, $userTaskType)) {
-                $maxTotalTasks = $this->getMaxTotalTasks($expertise);
-                $userAssignedTaskList = $this->taskRepository->findByUserToday($user, $date);
-                // variable globale pour traçer les heures prises de chaque user sans passer ripository
-                $countUserAssignedTasks = count($userAssignedTaskList);
-                if ($countUserAssignedTasks < $maxTotalTasks) {
-                    $taskHour = $task->getStartDate()->format('H:i:s');
-                    $dateTime = $task->getStartDate()->format('Y-m-d H:i:s');
-                    $currentTaskByHour = $this->taskRepository->findByUserNow($user, $dateTime);
-                    if (count($currentTaskByHour) < $maxTaskByHour) {
-                        $currentTaskByHour++;
-                        $countUserAssignedTasks++;
-                        return true;
-                    }
-                }
-            }
-        }else{
-            return false;
+    public function canHandleTask($user, $task): bool
+    {
+        if(!array_key_exists($user->getId(), self::$userTaksInfo)) {
+            self::$userTaksInfo[$user->getId()] = [];
+            self::$userTaksInfo[$user->getId()]['countTasks'] = 0 ;
+            self::$userTaksInfo[$user->getId()]['startHour'] = [] ;
         }
+
+        $maxTotalTasks = 0;
+        $maxTaskByHour = 0;
+        $state = false;
+
+        $taskDifficulty = $task->getDifficulty();
+        $TaskType = $task->getType();
+        $taskHour = $task->getStartDate()->format('H:i:s');
+        $expertise = $user->getLevel();
+
+        $difficulties  = $this->getDifficultyByExpertise($expertise);
+        $maxTaskByHour = $this->getMaxTaskByHour($expertise);
+        $userTaskType = $this->getTaskType($expertise);
+        $maxTotalTasks = $this->getMaxTotalTasks($expertise);
+
+        
+        $nbrHour = count(array_filter(self::$userTaksInfo[$user->getId()]['startHour'], function ($hour) use ($taskHour) { return $hour == $taskHour; }));
+
+        if (in_array($taskDifficulty, $difficulties) &&
+            in_array($TaskType, $userTaskType) &&
+            self::$userTaksInfo[$user->getId()]['countTasks'] < $maxTotalTasks &&
+            $nbrHour < $maxTaskByHour) {
+            self::$userTaksInfo[$user->getId()]['countTasks']++;
+            self::$userTaksInfo[$user->getId()]['startHour'][] = $taskHour;
+            $state = true;
+        }
+        return $state;
     }
 
     private function getDifficultyByExpertise($expertise)
     {
+
         if ($expertise === self::DEB) {
             return [1];
         } elseif ($expertise === self::INTER) {
@@ -83,6 +71,7 @@ class AffectationTaskUserService
         }
         return [];
     }
+
     private function getMaxTotalTasks($expertise)
     {
         if ($expertise === self::DEB) {
@@ -110,7 +99,7 @@ class AffectationTaskUserService
         } elseif ($expertise === self::INTER) {
             return [self::INSTALLATION];
         } elseif ($expertise === self::EXPERT) {
-        return [self::MIGRATION, self::PORTABILITE,  self::INSTALLATION];
+            return [self::MIGRATION, self::PORTABILITE,  self::INSTALLATION];
         }
         return [];
     }

@@ -49,6 +49,7 @@ class ImportExcelCommand extends Command
             $task->setCode($rowData['C']);
             $dateString = $rowData['D'] . ' ' . $rowData['E'];
             $task->setStartDate(DateTime::createFromFormat($format, $dateString));
+
             $task->setDifficulty($this->taskService->taskReview($task));
             $this->entityManager->persist($task);
         }
