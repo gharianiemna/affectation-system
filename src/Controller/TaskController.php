@@ -9,18 +9,28 @@ use App\Entity\Task;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 class TaskController extends AbstractController
 {
     /**
+     * @Rest\Get("/getTasks", name="get_tasks")
+     * @Groups({"task"})
+     */
+    public function getTask(TaskService $taskService): Response
+    {
+        $tasks = $taskService->getTask();
+        return $this->json($tasks, 200, [], ['groups' => 'task']);
+    }
+
+    /**
      * @Rest\Post("/api/addTask")
      */
     public function addTask(Request $request, TaskService $taskService): Response
     {
-            $result = $taskService->addTask($request->getContent());
-            return new JsonResponse($result['message'], $result['code']);
+        $result = $taskService->addTask($request->getContent());
+        return new JsonResponse($result['message'], $result['code']);
     }
 
     /**

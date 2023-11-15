@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validation;
 use App\Repository\TaskRepository;
 use App\Service\AffectationTaskUserService;
+use App\Service\AffectationUpdatedService;
 
 class UserService
 {   const DEB = 'deb';
@@ -28,6 +29,7 @@ class UserService
     private $serializer;
     private $validator;
     private $affectationTaskUserService;
+    private $AffectationUpdatedService;
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepository $userRepository,
@@ -35,7 +37,8 @@ class UserService
         SerializerInterface $serializer,
         ValidatorInterface $validator,
         TaskRepository $taskRepository,
-        AffectationTaskUserService $affectationTaskUserService
+        AffectationTaskUserService $affectationTaskUserService,
+        AffectationUpdatedService $AffectationUpdatedService
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
@@ -44,6 +47,7 @@ class UserService
         $this->validator = $validator;
         $this->taskRepository = $taskRepository;
         $this->affectationTaskUserService=$affectationTaskUserService;
+        $this->AffectationUpdatedService=$AffectationUpdatedService;
     }
     public function register($data)
     {
@@ -68,15 +72,13 @@ class UserService
         $taskList = $this->taskRepository->findByStartDate($dateObj);
         foreach ($taskList as $task) {
                 foreach ($userList as $key => $user) {
-                    $canUserHandleTask = $this->affectationTaskUserService->canHandleTask($user, $task);
-
+                   // $canUserHandleTask = $this->affectationTaskUserService->canHandleTask($user, $task);
+                $canUserHandleTask = $this->AffectationUpdatedService->canHandleTask($user, $task);
                     if($canUserHandleTask) {
                         $task->setUser($user);
                         $this->entityManager->persist($task);
                         $this->entityManager->flush();
-                        
                         // reorganiser la liste des utilisateurs FIFO
-
                         unset($userList[$key]);
                         array_push($userList, $user);
                         $userList = array_values($userList); 
@@ -87,4 +89,17 @@ class UserService
         return ['message' => 'ok', 'code' => 201];
     }
 
+    public function getUsers(){
+        return $this->userRepository->findAll();
+    }
+
+    public function getUserById(int $id): ?User
+    {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
+            throw new NotFoundHttpException('User not found');
+        }
+        return $user;
+    }
+    
 }

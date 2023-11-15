@@ -46,7 +46,8 @@ class AffectationTaskUserService
         if (in_array($taskDifficulty, $difficulties) &&
             in_array($TaskType, $userTaskType) &&
             self::$userTaksInfo[$user->getId()]['countTasks'] < $maxTotalTasks &&
-            $nbrHour < $maxTaskByHour) {
+            $nbrHour < $maxTaskByHour) 
+            {
             self::$userTaksInfo[$user->getId()]['countTasks']++;
             self::$userTaksInfo[$user->getId()]['startHour'][] = $taskHour;
             $state = true;
@@ -78,7 +79,14 @@ class AffectationTaskUserService
         }
         return 0;
     }
-    private function getMaxTaskByHour($expertise)
+
+    /**
+     * retourne maximum taches par heure
+     *
+     * @param string $expertise
+     * @return void
+     */
+    private function getMaxTaskByHour(string $expertise)
     {
         if (($expertise === self::DEB) || ($expertise === self::INTER)) {
             return 1;

@@ -6,7 +6,7 @@ use App\Repository\TaskRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
-
+use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ORM\Entity(repositoryClass=TaskRepository::class)
  */
@@ -24,16 +24,19 @@ class Task
      * @Assert\ExpressionLanguageSyntax(
      *     allowedVariables={"migration", "installation", "portabilité"}
      * )
+     * @Groups({"task"})
      */
     private $type;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"task"})
      */
     private $difficulty;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"task"})
      */
     private $name;
 
@@ -43,16 +46,19 @@ class Task
      *     pattern="/^[a-zA-Z]{2}-[a-zA-Z]{4}-[a-zA-Z]{2}$/",
      *     message="The code must match the format xx-xxxx-xx"
      * )
+     * @Groups({"task"})
      */
     private $code;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="task")
+     * @Groups({"task"})
      */
     private $user;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * @Groups({"task"})
      */
     private $startDate;
 

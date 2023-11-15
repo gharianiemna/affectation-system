@@ -28,7 +28,10 @@ class TaskService
         $this->entityManager=$entityManager;
         $this->taskRepository=$taskRepository;
     }
-
+    public function getTask(){
+        return $this->taskRepository->findAll();
+    }
+    
     public function addTask($data){
         $result=[];
         $task = $this->serializer->deserialize($data, Task::class, 'json');

@@ -24,6 +24,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *  @Groups({"userList", "user"})
      */
     private $id;
 
@@ -31,6 +32,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"register"})
      * @Assert\NotBlank()
+     *  @Groups({"userList", "user"})
      */
     private $firstName;
 
@@ -38,6 +40,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Groups({"register"})
      * @Assert\NotBlank()
+     * @Groups({"userList", "user"})
      */
     private $lastName;
 
@@ -45,6 +48,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @ORM\Column(type="integer", nullable=false)
      * @Groups({"register"})
      * @Assert\NotBlank()
+     * @Groups({"userList", "user"})
      */
     private $age;
 
@@ -54,6 +58,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @Assert\ExpressionLanguageSyntax(
      *     allowedVariables={"deb", "inter", "expert"}
      * )
+     * @Groups({"userList", "user"})
      */
     private $level;
 
@@ -78,6 +83,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=191, nullable=false, unique=true)
      * @Groups({"register"})
      * @Assert\NotBlank()
+     *  @Groups({"userList", "task"})
      */
     private $username;
 
