@@ -12,6 +12,7 @@ use App\Entity\Task;
 use App\Service\TaskService;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use DateTime;
+use Psr\Log\LoggerInterface;
 
 class ImportExcelCommand extends Command
 {
@@ -19,11 +20,14 @@ class ImportExcelCommand extends Command
 
     private $entityManager;
     private $taskService;
-    public function __construct(EntityManagerInterface $entityManager, TaskService $taskService)
+    private $logger;
+    public function __construct(EntityManagerInterface $entityManager, TaskService $taskService, LoggerInterface $logger)
     {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->taskService = $taskService;
+        $this->logger = $logger;
+        $this->logger->init('hub');
     }
 
     protected function configure()
@@ -34,12 +38,13 @@ class ImportExcelCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+    try {
         $filePath = $input->getArgument('file');
         if (!file_exists($filePath)) {
             throw new InvalidArgumentException("The file '$filePath' does not exist.");
         }
         $spreadsheet = IOFactory::load($filePath);
-        $row = $spreadsheet->getActiveSheet()->removeRow(1); 
+        $row = $spreadsheet->getActiveSheet()->removeRow(1);
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
         foreach ($sheetData as $rowData) {
             $task = new Task();
@@ -56,5 +61,10 @@ class ImportExcelCommand extends Command
         $this->entityManager->flush();
         $output->writeln('Data imported successfully.');
         return Command::SUCCESS;
+        $this->logger->info('ImportExcelCommand executed successfully.');
+
+    } catch (\Exception $exception) {
+        $this->logger->addError('Une exception : ' . $exception->getMessage());
     }
+}
 }

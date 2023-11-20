@@ -16,6 +16,7 @@ class Task
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"task", "userList"})
      */
     private $id;
 
@@ -30,13 +31,13 @@ class Task
 
     /**
      * @ORM\Column(type="integer")
-     * @Groups({"task"})
+     * @Groups({"task", "userList"})
      */
     private $difficulty;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"task"})
+     * @Groups({"task",})
      */
     private $name;
 
@@ -46,7 +47,7 @@ class Task
      *     pattern="/^[a-zA-Z]{2}-[a-zA-Z]{4}-[a-zA-Z]{2}$/",
      *     message="The code must match the format xx-xxxx-xx"
      * )
-     * @Groups({"task"})
+     * @Groups({"task", "userList"})
      */
     private $code;
 

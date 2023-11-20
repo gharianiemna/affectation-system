@@ -10,6 +10,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class TaskService
 {
@@ -31,7 +32,7 @@ class TaskService
     public function getTask(){
         return $this->taskRepository->findAll();
     }
-    
+
     public function addTask($data){
         $result=[];
         $task = $this->serializer->deserialize($data, Task::class, 'json');
@@ -91,5 +92,37 @@ class TaskService
             $value = 3;
         }
         return max($diff, $value);
+    }
+
+    public function uploadXslx($request){
+    $file = $request->files->get('file'); 
+    $fileFolder = __DIR__ . '/../../public/uploads/';
+    $filePathName = md5(uniqid()) . $file->getClientOriginalName();
+                try {
+                    $file->move($fileFolder, $filePathName);
+                } catch (FileException $e) {
+                    dd($e);
+                }
+        $spreadsheet = IOFactory::load($fileFolder . $filePathName); 
+        $row = $spreadsheet->getActiveSheet()->removeRow(1); 
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+    foreach ($sheetData as $Row) 
+        { 
+            $type = $Row['A']; 
+            $difficulty = $Row['B']; 
+            $name= $Row['C']; 
+            $code = $Row['D']; 
+            $startDate = $Row['E'];    
+                $task = new Task(); 
+                $task->setType($type);           
+                $task->setDifficulty($difficulty);
+                $task->setName($name);
+                $task->setCode($code);
+                $task->setStartDate(new \DateTime($startDate));
+                $this->entityManager->persist($task); 
+                $this->entityManager->flush(); 
+        } 
+        return  $result=['message'=>'ok', 'code'=> 201];
     }
 }

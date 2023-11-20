@@ -75,7 +75,7 @@ class User implements UserInterface , PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Task::class, mappedBy="user")
-     * @Groups({"register"})
+     * @Groups({"userList"})
      */
     private $task;
 
